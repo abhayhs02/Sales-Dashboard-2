@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { FiMenu, FiCalendar, FiUser, FiBell, FiSearch, FiDownload, FiChevronDown } from 'react-icons/fi';
+import { FiMenu, FiCalendar, FiUser, FiChevronDown, FiDownload } from 'react-icons/fi';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { FilterContext } from '../../context/FilterContext';
@@ -11,55 +11,6 @@ const Header = ({ onToggleSidebar }) => {
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const datePickerRef = useRef(null);
   const dateDropdownRef = useRef(null);
-  
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
-        setDatePickerOpen(false);
-      }
-      if (dateDropdownRef.current && !dateDropdownRef.current.contains(event.target)) {
-        setDateDropdownOpen(false);
-      }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleDateChange = (dates) => {
-    const [start, end] = dates;
-    
-    // Only update if both dates are selected
-    if (start && end) {
-      updateFilter('dateRange', { startDate: start, endDate: end });
-      setDatePickerOpen(false);
-    }
-  };
-
-  const formatDateRange = () => {
-    const { startDate, endDate } = filters.dateRange;
-    const startStr = format(startDate, 'MMM d, yyyy');
-    const endStr = format(endDate, 'MMM d, yyyy');
-    return `${startStr} - ${endStr}`;
-  };
-
-  const toggleDatePicker = () => {
-    setDatePickerOpen(!datePickerOpen);
-    setDateDropdownOpen(false);
-  };
-  
-  const toggleDateDropdown = () => {
-    setDateDropdownOpen(!dateDropdownOpen);
-    setDatePickerOpen(false);
-  };
-
-  const handleExport = () => {
-    alert('Exporting dashboard data...');
-    // Implement export functionality
-  };
   
   // Preset date ranges adjusted for dataset with dates up to 2017
   const dateRanges = [
@@ -120,6 +71,66 @@ const Header = ({ onToggleSidebar }) => {
       })
     },
   ];
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setDatePickerOpen(false);
+      }
+      if (dateDropdownRef.current && !dateDropdownRef.current.contains(event.target)) {
+        setDateDropdownOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Find the current selected range label
+  const getCurrentRangeLabel = () => {
+    const currentRange = dateRanges.find(range => {
+      const rangeValue = range.range();
+      return rangeValue.startDate.getTime() === filters.dateRange.startDate.getTime() &&
+             rangeValue.endDate.getTime() === filters.dateRange.endDate.getTime();
+    });
+    
+    return currentRange ? currentRange.label : 'Quick Select';
+  };
+
+  const handleDateChange = (dates) => {
+    const [start, end] = dates;
+    
+    // Only update if both dates are selected
+    if (start && end) {
+      updateFilter('dateRange', { startDate: start, endDate: end });
+      setDatePickerOpen(false);
+    }
+  };
+
+  const formatDateRange = () => {
+    const { startDate, endDate } = filters.dateRange;
+    const startStr = format(startDate, 'MMM d, yyyy');
+    const endStr = format(endDate, 'MMM d, yyyy');
+    return `${startStr} - ${endStr}`;
+  };
+
+  const toggleDatePicker = () => {
+    setDatePickerOpen(!datePickerOpen);
+    setDateDropdownOpen(false);
+  };
+  
+  const toggleDateDropdown = () => {
+    setDateDropdownOpen(!dateDropdownOpen);
+    setDatePickerOpen(false);
+  };
+
+  const handleExport = () => {
+    alert('Exporting dashboard data...');
+    // Implement export functionality
+  };
   
   const applyDateRange = (rangeFn) => {
     updateFilter('dateRange', rangeFn());
@@ -137,17 +148,6 @@ const Header = ({ onToggleSidebar }) => {
           >
             <FiMenu size={24} />
           </button>
-          
-          <div className="ml-6 relative">
-            <div className="flex items-center text-gray-700 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-              <FiSearch className="ml-3 mr-1 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="py-2 pl-1 pr-3 w-64 rounded-md focus:outline-none"
-              />
-            </div>
-          </div>
         </div>
         
         <div className="flex items-center space-x-4">
@@ -159,7 +159,7 @@ const Header = ({ onToggleSidebar }) => {
                 className="flex items-center bg-white border border-gray-300 hover:bg-gray-50 rounded-md px-3 py-2 cursor-pointer"
                 onClick={toggleDateDropdown}
               >
-                <span className="text-sm text-gray-700">Quick Select</span>
+                <span className="text-sm text-gray-700">{getCurrentRangeLabel()}</span>
                 <FiChevronDown className="ml-2 text-gray-500" />
               </button>
               
@@ -219,11 +219,6 @@ const Header = ({ onToggleSidebar }) => {
           >
             <FiDownload className="mr-2" />
             <span>Export</span>
-          </button>
-          
-          {/* Notification */}
-          <button className="p-2 rounded-full text-gray-500 hover:bg-gray-100">
-            <FiBell size={20} />
           </button>
           
           {/* User Profile */}

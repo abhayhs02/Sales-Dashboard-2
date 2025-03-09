@@ -5,7 +5,6 @@ import ImprovedLineChart from './LineChart';
 import GeographicMap from './GeographicMap';
 import NetworkVisualization from './NetworkVisualization';
 import SunburstVisualization from './SunburstVisualization';
-import StreamGraph from './StreamGraph';
 
 // This module exports chart components for use in the dashboard
 const ChartSection = {
@@ -14,8 +13,7 @@ const ChartSection = {
   LineChart: ImprovedLineChart, // Using the improved line chart with contained tooltip
   GeoMap: GeographicMap,
   ForceGraph: NetworkVisualization,
-  SunburstChart: SunburstVisualization,
-  StreamGraph: StreamGraph
+  SunburstChart: SunburstVisualization
 };
 
 export default ChartSection;

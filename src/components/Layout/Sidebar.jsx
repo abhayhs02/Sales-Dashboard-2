@@ -9,10 +9,6 @@ const Sidebar = ({ isOpen }) => {
   const navItems = [
     { icon: <FiHome size={20} />, label: 'Dashboard', active: true },
     { icon: <FiPieChart size={20} />, label: 'Analytics', active: false },
-    { icon: <FiBarChart2 size={20} />, label: 'Reports', active: false },
-    { icon: <FiMap size={20} />, label: 'Geography', active: false },
-    { icon: <FiBox size={20} />, label: 'Products', active: false },
-    { icon: <FiUsers size={20} />, label: 'Customers', active: false },
     { icon: <FiSettings size={20} />, label: 'Settings', active: false },
   ];
 

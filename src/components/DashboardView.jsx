@@ -100,15 +100,7 @@ const DashboardView = () => {
         </div>
       </div>
       
-      {/* Fifth Row: Stream Graph */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <h2 className="text-lg font-medium mb-4">Time-Series Analysis</h2>
-        <div className="h-64">
-          <ChartSection.StreamGraph data={data} />
-        </div>
-      </div>
-      
-      {/* Sixth Row: Data Table */}
+      {/* Fifth Row: Data Table */}
       <div className="bg-white rounded-lg shadow-md p-4">
         <h2 className="text-lg font-medium mb-4">Recent Orders</h2>
         <DataTable data={data} />

@@ -29,56 +29,6 @@ function App() {
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Load data on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Try to fetch real data
-        try {
-          const response = await window.fs.readFile('MLDataset.csv');
-          const csvText = new TextDecoder().decode(response);
-          
-          Papa.parse(csvText, {
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true,
-            complete: (results) => {
-              // Process the data
-              const processedData = results.data.map(row => ({
-                ...row,
-                OrderDate: row.OrderDate ? new Date(row.OrderDate) : null,
-                EmployeeHireDate: row.EmployeeHireDate ? new Date(row.EmployeeHireDate) : null,
-                // Calculate total amount for convenience
-                TotalAmount: (row.OrderItemQuantity || 0) * (row.PerUnitPrice || 0)
-              }));
-              
-              setData(processedData);
-              setIsLoading(false);
-            },
-            error: (error) => {
-              console.error("CSV parsing error:", error);
-              throw new Error('Failed to parse CSV data');
-            }
-          });
-        } catch (fileError) {
-          console.warn('Could not load CSV file, using mock data:', fileError);
-          
-          // Use mock data as fallback
-          setData(getMockData());
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Data fetching error:', error);
-        setError("Failed to load data");
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // Memoized filtered data to prevent unnecessary recalculations
   const filteredData = useMemo(() => {
     if (!data.length) return [];
@@ -140,7 +90,57 @@ function App() {
     setSidebarOpen(prev => !prev);
   };
 
-  // Mock data for fallback - dates adjusted to match dataset timeframe
+  // Load data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Try to fetch real data
+        try {
+          const response = await fetch('/MLDataset.csv');
+          const csvText = await response.text();
+          
+          Papa.parse(csvText, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              // Process the data
+              const processedData = results.data.map(row => ({
+                ...row,
+                OrderDate: row.OrderDate ? new Date(row.OrderDate) : null,
+                EmployeeHireDate: row.EmployeeHireDate ? new Date(row.EmployeeHireDate) : null,
+                // Calculate total amount for convenience
+                TotalAmount: (row.OrderItemQuantity || 0) * (row.PerUnitPrice || 0)
+              }));
+              
+              setData(processedData);
+              setIsLoading(false);
+            },
+            error: (error) => {
+              console.error("CSV parsing error:", error);
+              throw new Error('Failed to parse CSV data');
+            }
+          });
+        } catch (fileError) {
+          console.warn('Could not load CSV file, using mock data:', fileError);
+          
+          // Use mock data as fallback
+          setData(getMockData());
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Data fetching error:', error);
+        setError("Failed to load data");
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Mock data generator (kept from previous implementation)
   function getMockData() {
     // Generate a series of dates from the historical dataset timeframe
     const generateDates = () => {
@@ -204,7 +204,7 @@ function App() {
     });
   }
 
-  // Loading state
+  // Render loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -213,7 +213,7 @@ function App() {
     );
   }
 
-  // Error state
+  // Render error state
   if (error) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-red-50 p-6">
@@ -232,6 +232,7 @@ function App() {
     );
   }
 
+  // Render dashboard
   return (
     <DataContext.Provider value={{ data: filteredData, allData: data }}>
       <FilterContext.Provider value={{ 
