@@ -16,7 +16,7 @@ const DataTable = ({ data }) => {
     { id: 'CategoryName', label: 'Category' },
     { id: 'OrderItemQuantity', label: 'Quantity', format: (value) => value?.toLocaleString() },
     { id: 'PerUnitPrice', label: 'Unit Price', format: (value) => value ? `$${value.toLocaleString()}` : '' },
-    { id: 'TotalAmount', label: 'Total Amount', format: (value) => `$${value.toLocaleString()}` },
+    { id: 'TotalAmount', label: 'Total Amount', format: (value) => value ? `$${value.toLocaleString()}` : '' },
     { id: 'Profit', label: 'Profit', format: (value) => value ? `$${value.toLocaleString()}` : '' },
     { id: 'Status', label: 'Status', format: (value) => (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(value)}`}>
@@ -40,10 +40,19 @@ const DataTable = ({ data }) => {
   
   // Calculate total amount for each row
   const processedData = useMemo(() => {
-    return data.map(row => ({
-      ...row,
-      TotalAmount: (row.OrderItemQuantity || 0) * (row.PerUnitPrice || 0)
-    }));
+    return data.map(row => {
+      // Ensure OrderDate is a proper Date object
+      let orderDate = row.OrderDate;
+      if (orderDate && !(orderDate instanceof Date)) {
+        orderDate = new Date(orderDate);
+      }
+      
+      return {
+        ...row,
+        OrderDate: orderDate,
+        TotalAmount: (row.OrderItemQuantity || 0) * (row.PerUnitPrice || 0)
+      };
+    });
   }, [data]);
   
   // Filter, sort, and paginate data
@@ -56,7 +65,14 @@ const DataTable = ({ data }) => {
       filteredData = processedData.filter(row => {
         return Object.keys(row).some(key => {
           const value = row[key];
-          return value && String(value).toLowerCase().includes(query);
+          if (value === null || value === undefined) return false;
+          
+          // Special handling for dates
+          if (value instanceof Date) {
+            return value.toLocaleDateString().toLowerCase().includes(query);
+          }
+          
+          return String(value).toLowerCase().includes(query);
         });
       });
     }
@@ -72,8 +88,13 @@ const DataTable = ({ data }) => {
       
       // Handle dates
       if (sortColumn === 'OrderDate') {
-        valueA = new Date(valueA);
-        valueB = new Date(valueB);
+        // Ensure both are Date objects
+        if (!(valueA instanceof Date)) valueA = new Date(valueA);
+        if (!(valueB instanceof Date)) valueB = new Date(valueB);
+        
+        // Handle invalid dates - put them at the end
+        if (isNaN(valueA)) return 1;
+        if (isNaN(valueB)) return -1;
       }
       
       // Handle string comparison

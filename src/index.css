@@ -31,3 +31,101 @@ body {
 .react-datepicker-popper {
   z-index: 100 !important;
 }
+
+/* 3D Card Flip Effect */
+.perspective {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Color utilities for dynamic colors */
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+.bg-green-50 {
+  background-color: #ecfdf5;
+}
+
+.bg-purple-50 {
+  background-color: #f5f3ff;
+}
+
+.bg-orange-50 {
+  background-color: #fff7ed;
+}
+
+.bg-red-50 {
+  background-color: #fef2f2;
+}
+
+.from-blue-50 {
+  --tw-gradient-from: #eff6ff;
+  --tw-gradient-to: rgb(239 246 255 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-green-50 {
+  --tw-gradient-from: #ecfdf5;
+  --tw-gradient-to: rgb(236 253 245 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-purple-50 {
+  --tw-gradient-from: #f5f3ff;
+  --tw-gradient-to: rgb(245 243 255 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-orange-50 {
+  --tw-gradient-from: #fff7ed;
+  --tw-gradient-to: rgb(255 247 237 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.bg-green-100 {
+  background-color: #d1fae5;
+}
+
+.bg-purple-100 {
+  background-color: #ede9fe;
+}
+
+.bg-orange-100 {
+  background-color: #ffedd5;
+}
+
+/* Transition utilities */
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.duration-700 {
+  transition-duration: 700ms;
+}
+
+/* Visibility utilities */
+.visible {
+  visibility: visible;
+}
+
+.invisible {
+  visibility: hidden;
+}

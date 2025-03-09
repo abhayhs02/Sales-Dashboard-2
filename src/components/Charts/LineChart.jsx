@@ -1,15 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-// A simplified line chart implementation
-const SimpleLineChart = ({ data, timeFrame = 'monthly' }) => {
+// An improved line chart implementation with contained tooltip
+const ImprovedLineChart = ({ data, timeFrame = 'monthly' }) => {
   const svgRef = useRef(null);
+  const containerRef = useRef(null);
   const tooltipRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   
   // Set up dimensions when the component mounts
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!containerRef.current) return;
     
     const resizeObserver = new ResizeObserver(entries => {
       if (!entries.length) return;
@@ -18,11 +19,11 @@ const SimpleLineChart = ({ data, timeFrame = 'monthly' }) => {
       setDimensions({ width, height });
     });
     
-    resizeObserver.observe(svgRef.current.parentElement);
+    resizeObserver.observe(containerRef.current);
     
     return () => {
-      if (svgRef.current?.parentElement) {
-        resizeObserver.unobserve(svgRef.current.parentElement);
+      if (containerRef.current) {
+        resizeObserver.unobserve(containerRef.current);
       }
     };
   }, []);
@@ -43,15 +44,29 @@ const SimpleLineChart = ({ data, timeFrame = 'monthly' }) => {
       }
     };
     
+    // First, identify the valid date range in the data
+    const validDates = data
+      .filter(item => item.OrderDate instanceof Date && !isNaN(item.OrderDate))
+      .map(item => item.OrderDate);
+    
+    if (validDates.length === 0) return [];
+    
+    // Sort dates and get min/max
+    validDates.sort((a, b) => a - b);
+    const minDate = validDates[0];
+    const maxDate = validDates[validDates.length - 1];
+    
+    console.log(`Data date range: ${minDate.toISOString()} to ${maxDate.toISOString()}`);
+    
+    // Process the actual data
     data.forEach(item => {
-      if (!item.OrderDate) return;
+      if (!item.OrderDate || !(item.OrderDate instanceof Date) || isNaN(item.OrderDate)) return;
       
-      const date = new Date(item.OrderDate);
-      const timeKey = getTimeKey(date);
+      const timeKey = getTimeKey(item.OrderDate);
       
       if (!timeSeriesData[timeKey]) {
         timeSeriesData[timeKey] = {
-          date: date,
+          date: new Date(item.OrderDate.getFullYear(), item.OrderDate.getMonth(), 15), // middle of month
           key: timeKey,
           sales: 0,
           profit: 0
@@ -144,18 +159,21 @@ const SimpleLineChart = ({ data, timeFrame = 'monthly' }) => {
       .attr("fill", "url(#sales-gradient)")
       .attr("d", areaSales);
     
-    // Add x-axis
+    // Add x-axis with proper date format based on data range
+    const xAxis = d3.axisBottom(xScale);
+    
+    // Customize tick format based on date range
+    if (timeFrame === 'monthly') {
+      xAxis.ticks(d3.timeMonth.every(1))
+        .tickFormat(d3.timeFormat("%b %Y"));
+    } else {
+      xAxis.ticks(d3.timeWeek.every(2))
+        .tickFormat(d3.timeFormat("W%W %Y"));
+    }
+    
     svg.append("g")
       .attr("transform", `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(xScale)
-        .ticks(timeFrame === 'monthly' ? d3.timeMonth.every(1) : d3.timeWeek.every(2))
-        .tickFormat(d => {
-          if (timeFrame === 'monthly') {
-            return d3.timeFormat("%b %Y")(d);
-          } else {
-            return d3.timeFormat("W%W %Y")(d);
-          }
-        }))
+      .call(xAxis)
       .selectAll("text")
       .attr("transform", "rotate(-45)")
       .style("text-anchor", "end")
@@ -247,6 +265,18 @@ const SimpleLineChart = ({ data, timeFrame = 'monthly' }) => {
       .text("Profit")
       .attr("font-size", "12px");
     
+    // Initialize tooltip
+    const tooltip = d3.select(tooltipRef.current)
+      .style("opacity", 0)
+      .style("background-color", "white")
+      .style("border", "1px solid #ddd")
+      .style("border-radius", "4px")
+      .style("padding", "10px")
+      .style("position", "absolute")
+      .style("pointer-events", "none")
+      .style("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
+      .style("z-index", "10");
+    
     // Add interactive overlay
     svg.append("rect")
       .attr("class", "overlay")
@@ -261,61 +291,116 @@ const SimpleLineChart = ({ data, timeFrame = 'monthly' }) => {
         // Find closest data point
         const bisectDate = d3.bisector(d => d.date).left;
         const i = bisectDate(chartData, x0, 1);
-        const d0 = chartData[i - 1];
-        const d1 = chartData[i];
-        const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
         
-        // Show vertical line at that point
-        svg.selectAll(".hover-line").remove();
-        svg.append("line")
-          .attr("class", "hover-line")
-          .attr("x1", xScale(d.date))
-          .attr("x2", xScale(d.date))
-          .attr("y1", 0)
-          .attr("y2", innerHeight)
-          .attr("stroke", "#9ca3af")
-          .attr("stroke-width", 1)
-          .attr("stroke-dasharray", "3,3");
-        
-        // Show tooltip
-        const formatDate = timeFrame === 'monthly' 
-          ? d3.timeFormat("%B %Y") 
-          : d3.timeFormat("Week %W, %Y");
-        
-        const tooltip = d3.select(tooltipRef.current);
-        tooltip.style("opacity", 1)
-          .html(`
-            <div class="p-2">
-              <div class="font-bold mb-1">${formatDate(d.date)}</div>
-              <div class="text-indigo-600">Sales: $${d.sales.toLocaleString()}</div>
-              <div class="text-emerald-600">Profit: $${d.profit.toLocaleString()}</div>
-              <div class="text-gray-600">Margin: ${(d.profit / d.sales * 100).toFixed(1)}%</div>
-            </div>
-          `)
-          .style("left", `${event.pageX + 15}px`)
-          .style("top", `${event.pageY - 28}px`);
+        // Handle edge cases
+        if (i === 0) {
+          handleDataPoint(chartData[0], event);
+        } else if (i >= chartData.length) {
+          handleDataPoint(chartData[chartData.length - 1], event);
+        } else {
+          const d0 = chartData[i - 1];
+          const d1 = chartData[i];
+          const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+          handleDataPoint(d, event);
+        }
       })
       .on("mouseout", function() {
         svg.selectAll(".hover-line").remove();
-        d3.select(tooltipRef.current).style("opacity", 0);
+        tooltip.style("opacity", 0);
       });
+    
+    // Function to handle data point hover
+    function handleDataPoint(d, event) {
+      // Show vertical line at that point
+      svg.selectAll(".hover-line").remove();
+      svg.append("line")
+        .attr("class", "hover-line")
+        .attr("x1", xScale(d.date))
+        .attr("x2", xScale(d.date))
+        .attr("y1", 0)
+        .attr("y2", innerHeight)
+        .attr("stroke", "#9ca3af")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "3,3");
+      
+      // Calculate tooltip position - ensure it stays within container bounds
+      const formatDate = timeFrame === 'monthly' 
+        ? d3.timeFormat("%B %Y") 
+        : d3.timeFormat("Week %W, %Y");
+      
+      // Get container bounds
+      const containerBounds = containerRef.current.getBoundingClientRect();
+      const svgBounds = svgRef.current.getBoundingClientRect();
+      
+      // Get mouse position relative to the SVG
+      const mousePosition = d3.pointer(event, containerRef.current);
+      
+      // Calculate tooltip dimensions
+      const tooltipNode = tooltip.node();
+      const tooltipWidth = tooltipNode.offsetWidth;
+      const tooltipHeight = tooltipNode.offsetHeight;
+      
+      // Calculate position
+      let left = mousePosition[0] + 15;
+      let top = mousePosition[1] - 10;
+      
+      // Ensure tooltip stays within right edge
+      if (left + tooltipWidth > containerBounds.width) {
+        left = mousePosition[0] - tooltipWidth - 15;
+      }
+      
+      // Ensure tooltip stays within bottom edge
+      if (top + tooltipHeight > containerBounds.height) {
+        top = mousePosition[1] - tooltipHeight - 10;
+      }
+      
+      // Ensure tooltip doesn't go above top edge
+      if (top < 0) {
+        top = 5;
+      }
+      
+      // Ensure tooltip doesn't go left of left edge
+      if (left < 0) {
+        left = 5;
+      }
+      
+      // Show and position tooltip
+      tooltip
+        .style("opacity", 1)
+        .html(`
+          <div class="p-2">
+            <div class="font-bold mb-1">${formatDate(d.date)}</div>
+            <div class="text-indigo-600">Sales: $${d.sales.toLocaleString()}</div>
+            <div class="text-emerald-600">Profit: $${d.profit.toLocaleString()}</div>
+            <div class="text-gray-600">Margin: ${(d.profit / d.sales * 100).toFixed(1)}%</div>
+          </div>
+        `)
+        .style("left", `${left}px`)
+        .style("top", `${top}px`);
+    }
     
   }, [chartData, dimensions, timeFrame]);
   
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full">
       <svg ref={svgRef} className="w-full h-full"></svg>
       <div
         ref={tooltipRef}
-        className="absolute bg-white shadow-md rounded-md text-sm pointer-events-none opacity-0 z-10"
-        style={{
-          transition: "opacity 0.2s ease-in-out",
-          top: 0,
-          left: 0
-        }}
+        className="absolute opacity-0 bg-white shadow-md rounded-md text-sm pointer-events-none z-10"
       ></div>
+      
+      {(!chartData || chartData.length === 0) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-75">
+          <div className="text-center p-4">
+            <div className="text-gray-500 mb-2">No data available for the selected period</div>
+            <div className="text-sm text-gray-400">
+              Try selecting a different date range
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default SimpleLineChart;
+export default ImprovedLineChart;

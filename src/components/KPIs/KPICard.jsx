@@ -1,16 +1,17 @@
-import React, { useRef, useEffect } from 'react';
-import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
+import React, { useRef, useEffect, useState } from 'react';
+import { FiTrendingUp, FiTrendingDown, FiInfo } from 'react-icons/fi';
 import * as d3 from 'd3';
 
-const KPICard = ({ title, value, icon, change, sparklineData = [], color }) => {
+const FlippableKPICard = ({ title, value, icon, change, sparklineData = [], color, description }) => {
   const sparklineRef = useRef(null);
+  const [isFlipped, setIsFlipped] = useState(false);
   
   // Draw sparkline on component mount and when data changes
   useEffect(() => {
-    if (sparklineData && sparklineData.length > 0 && sparklineRef.current) {
+    if (sparklineData && sparklineData.length > 0 && sparklineRef.current && !isFlipped) {
       drawSparkline(sparklineRef.current, sparklineData, color);
     }
-  }, [sparklineData, color]);
+  }, [sparklineData, color, isFlipped]);
   
   // Function to draw sparkline
   const drawSparkline = (element, data, color) => {
@@ -130,12 +131,35 @@ const KPICard = ({ title, value, icon, change, sparklineData = [], color }) => {
     );
   };
   
+  // Get default descriptions if not provided
+  const getDefaultDescription = () => {
+    const defaultDescriptions = {
+      "Total Sales": "Total revenue generated from all sales during the selected period. The trend line shows sales over the past 6 months.",
+      "Total Profit": "Net profit after deducting all costs from sales. The trend line indicates profit movement over the past 6 months.",
+      "Total Orders": "Number of unique orders processed during the selected period. The trend shows order volume over the past 6 months.",
+      "Unique Customers": "Count of distinct customers who made purchases. The trend shows customer acquisition over the past 6 months."
+    };
+    
+    return description || defaultDescriptions[title] || "Key performance indicator tracking business metrics over time.";
+  };
+  
+  // Determine trend text
+  const getTrendText = () => {
+    if (change === undefined || change === null) return "Stable";
+    if (change > 5) return "Strong upward trend";
+    if (change > 0) return "Slight upward trend";
+    if (change < -5) return "Strong downward trend";
+    if (change < 0) return "Slight downward trend";
+    return "Stable";
+  };
+  
+  // Simple card without 3D effects - easier to fix the height issues
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+    <div className="bg-white rounded-lg shadow-md p-4 h-40 hover:shadow-lg transition-shadow cursor-pointer">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <div className={`p-2 rounded-full bg-${color}-100`}>
-          {icon}
+        <div className={`p-2 rounded-full`} style={{ backgroundColor: getColorCode(color) + '20' }}>
+          {React.cloneElement(icon, { style: { color: getColorCode(color) } })}
         </div>
       </div>
       
@@ -149,8 +173,12 @@ const KPICard = ({ title, value, icon, change, sparklineData = [], color }) => {
       {sparklineData && sparklineData.length > 0 && (
         <div className="mt-2" ref={sparklineRef}></div>
       )}
+      
+      <div className="text-xs text-center text-gray-400 mt-1">
+        Click for details
+      </div>
     </div>
   );
 };
 
-export default KPICard;
+export default FlippableKPICard;

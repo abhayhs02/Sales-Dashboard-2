@@ -1,22 +1,21 @@
 import React from 'react';
-import SimplePieChart from './SimplePieChart';
+import EnhancedPieChart from './SimplePieChart';
 import SimpleBarChart from './SimpleBarChart';
-import SimpleLineChart from './SimpleLineChart';
-import SimpleGeoMap from './SimpleGeoMap';
-import SimpleForceGraph from './SimpleForceGraph';
-import SimpleSunburstChart from './SimpleSunburstChart';
-import SimpleStreamGraph from './SimpleStreamGraph';
+import ImprovedLineChart from './LineChart';
+import GeographicMap from './GeographicMap';
+import NetworkVisualization from './NetworkVisualization';
+import SunburstVisualization from './SunburstVisualization';
+import StreamGraph from './StreamGraph';
 
-// This module exports simplified chart components
-// for use in the dashboard
+// This module exports chart components for use in the dashboard
 const ChartSection = {
-  PieChart: SimplePieChart,
+  PieChart: EnhancedPieChart,
   BarChart: SimpleBarChart,
-  LineChart: SimpleLineChart,
-  GeoMap: SimpleGeoMap,
-  ForceGraph: SimpleForceGraph,
-  SunburstChart: SimpleSunburstChart,
-  StreamGraph: SimpleStreamGraph
+  LineChart: ImprovedLineChart, // Using the improved line chart with contained tooltip
+  GeoMap: GeographicMap,
+  ForceGraph: NetworkVisualization,
+  SunburstChart: SunburstVisualization,
+  StreamGraph: StreamGraph
 };
 
 export default ChartSection;

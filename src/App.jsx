@@ -5,11 +5,11 @@ import DashboardView from './components/DashboardView';
 import { DataContext } from './context/DataContext';
 import { FilterContext } from './context/FilterContext';
 
-// Initial filter state
+// Initial filter state - set to 2017 data by default
 const initialFilters = {
   dateRange: {
-    startDate: new Date('2013-01-01'),
-    endDate: new Date('2018-01-01')
+    startDate: new Date('2017-01-01'), // Start of 2017
+    endDate: new Date('2017-12-31')    // End of 2017
   },
   regions: [],
   countries: [],
@@ -37,8 +37,8 @@ function App() {
         
         // Try to fetch real data
         try {
-          const response = await fetch('/MLDataset.csv');
-          const csvText = await response.text();
+          const response = await window.fs.readFile('MLDataset.csv');
+          const csvText = new TextDecoder().decode(response);
           
           Papa.parse(csvText, {
             header: true,
@@ -140,43 +140,68 @@ function App() {
     setSidebarOpen(prev => !prev);
   };
 
-  // Mock data for fallback
+  // Mock data for fallback - dates adjusted to match dataset timeframe
   function getMockData() {
-    return [
-      {
-        RegionName: "North America",
-        CountryName: "United States",
-        CategoryName: "Electronics",
-        ProductName: "Laptop",
-        OrderDate: new Date("2016-05-15"),
-        OrderItemQuantity: 5,
-        PerUnitPrice: 1200,
-        Profit: 1500,
-        Status: "Shipped"
-      },
-      {
-        RegionName: "Europe",
-        CountryName: "Germany",
-        CategoryName: "Furniture",
-        ProductName: "Office Chair",
-        OrderDate: new Date("2016-06-22"),
-        OrderItemQuantity: 10,
-        PerUnitPrice: 120,
-        Profit: 300,
-        Status: "Delivered"
-      },
-      {
-        RegionName: "Asia",
-        CountryName: "Japan",
-        CategoryName: "Electronics",
-        ProductName: "Smartphone",
-        OrderDate: new Date("2016-07-10"),
-        OrderItemQuantity: 20,
-        PerUnitPrice: 600,
-        Profit: 2000,
-        Status: "Processing"
+    // Generate a series of dates from the historical dataset timeframe
+    const generateDates = () => {
+      const dates = [];
+      for (let year = 2015; year <= 2017; year++) {
+        for (let month = 1; month <= 12; month++) {
+          dates.push(new Date(year, month - 1, 15)); // 15th of each month
+        }
       }
-    ];
+      return dates;
+    };
+    
+    const dates = generateDates();
+    const regions = ["North America", "Europe", "Asia", "South America", "Australia"];
+    const countries = {
+      "North America": ["United States", "Canada", "Mexico"],
+      "Europe": ["Germany", "France", "United Kingdom", "Italy"],
+      "Asia": ["Japan", "China", "India", "Singapore"],
+      "South America": ["Brazil", "Argentina", "Colombia"],
+      "Australia": ["Australia", "New Zealand"]
+    };
+    const categories = ["Electronics", "Furniture", "Office Supplies", "Clothing", "Food"];
+    const products = {
+      "Electronics": ["Laptop", "Smartphone", "Tablet", "Monitor", "Printer"],
+      "Furniture": ["Office Chair", "Desk", "Bookshelf", "Filing Cabinet", "Sofa"],
+      "Office Supplies": ["Paper", "Pens", "Stapler", "Notebooks", "Binders"],
+      "Clothing": ["T-Shirts", "Pants", "Jackets", "Shoes", "Accessories"],
+      "Food": ["Coffee", "Snacks", "Beverages", "Fruit", "Meals"]
+    };
+    const statuses = ["Shipped", "Pending", "Delivered", "Canceled", "Processing"];
+    
+    // Generate 100 random sales records
+    return Array.from({ length: 100 }, (_, index) => {
+      const region = regions[Math.floor(Math.random() * regions.length)];
+      const country = countries[region][Math.floor(Math.random() * countries[region].length)];
+      const category = categories[Math.floor(Math.random() * categories.length)];
+      const product = products[category][Math.floor(Math.random() * products[category].length)];
+      const quantity = Math.floor(Math.random() * 20) + 1;
+      const price = Math.floor(Math.random() * 1000) + 50;
+      const total = quantity * price;
+      const profit = Math.floor(total * (Math.random() * 0.3 + 0.1)); // 10-40% profit margin
+      const orderDate = dates[Math.floor(Math.random() * dates.length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      return {
+        RegionName: region,
+        CountryName: country,
+        State: `State ${index % 10}`,
+        City: `City ${index % 20}`,
+        CategoryName: category,
+        ProductName: product,
+        OrderDate: orderDate,
+        OrderItemQuantity: quantity,
+        PerUnitPrice: price,
+        TotalAmount: total,
+        Profit: profit,
+        Status: status,
+        CustomerName: `Customer ${index % 30}`,
+        EmployeeName: `Employee ${index % 15}`
+      };
+    });
   }
 
   // Loading state

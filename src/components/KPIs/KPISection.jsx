@@ -1,8 +1,10 @@
-import React, { useMemo } from 'react';
-import KPICard from './KPICard';
-import { FiDollarSign, FiShoppingBag, FiPackage, FiUsers } from 'react-icons/fi';
+import React, { useMemo, useState } from 'react';
+import FlippableKPICard from './KPICard';
+import { FiDollarSign, FiShoppingBag, FiPackage, FiUsers, FiX } from 'react-icons/fi';
 
 const KPISection = ({ data }) => {
+  const [selectedKPI, setSelectedKPI] = useState(null);
+  
   // Memoized KPI calculations
   const kpiData = useMemo(() => {
     if (!data || !data.length) {
@@ -98,44 +100,199 @@ const KPISection = ({ data }) => {
     };
   }, [data]);
 
+  // KPI descriptions
+  const kpiDescriptions = {
+    "Total Sales": "The total monetary value of all products sold in the selected period. This KPI shows the revenue generated before any deductions or costs. The upward or downward trend indicates whether sales are growing or declining compared to the previous period.",
+    
+    "Total Profit": "The net earnings after all costs have been deducted from sales revenue. This KPI measures the actual financial gain of the business. A positive trend indicates improving profit margins and business health.",
+    
+    "Total Orders": "The count of unique customer transactions processed within the selected period. This KPI helps track sales activity volume independent of monetary value. The trend shows whether customer purchasing frequency is increasing or decreasing.",
+    
+    "Unique Customers": "The number of individual customers who made at least one purchase during the selected period. This KPI helps track customer acquisition and retention. An upward trend indicates successful customer acquisition efforts."
+  };
+
+  // Card click handler to show modal
+  const handleCardClick = (kpiName) => {
+    setSelectedKPI(kpiName);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setSelectedKPI(null);
+  };
+
+  // Determine trend text
+  const getTrendText = (change) => {
+    if (change === undefined || change === null) return "Stable";
+    if (change > 5) return "Strong upward trend";
+    if (change > 0) return "Slight upward trend";
+    if (change < -5) return "Strong downward trend";
+    if (change < 0) return "Slight downward trend";
+    return "Stable";
+  };
+
+  // Modal content based on selected KPI
+  const renderModalContent = () => {
+    if (!selectedKPI) return null;
+
+    let value, change, color, icon, sparklineData;
+    
+    switch (selectedKPI) {
+      case "Total Sales":
+        value = `$${kpiData.totalSales.toLocaleString()}`;
+        change = kpiData.changes.sales;
+        color = 'blue';
+        icon = <FiDollarSign size={20} style={{ color: '#4f46e5' }} />;
+        sparklineData = kpiData.sparklineData.sales;
+        break;
+      case "Total Profit":
+        value = `$${kpiData.totalProfit.toLocaleString()}`;
+        change = kpiData.changes.profit;
+        color = 'green';
+        icon = <FiDollarSign size={20} style={{ color: '#10b981' }} />;
+        sparklineData = kpiData.sparklineData.profit;
+        break;
+      case "Total Orders":
+        value = kpiData.totalOrders.toLocaleString();
+        change = kpiData.changes.orders;
+        color = 'purple';
+        icon = <FiShoppingBag size={20} style={{ color: '#8b5cf6' }} />;
+        sparklineData = kpiData.sparklineData.orders;
+        break;
+      case "Unique Customers":
+        value = kpiData.uniqueCustomers.toLocaleString();
+        change = kpiData.changes.customers;
+        color = 'orange';
+        icon = <FiUsers size={20} style={{ color: '#f97316' }} />;
+        sparklineData = kpiData.sparklineData.customers;
+        break;
+      default:
+        return null;
+    }
+
+    const getColorCode = (color) => {
+      const colorMap = {
+        blue: '#4f46e5',
+        green: '#10b981',
+        purple: '#8b5cf6',
+        orange: '#f97316',
+        red: '#ef4444'
+      };
+      return colorMap[color] || colorMap.blue;
+    };
+
+    const colorCode = getColorCode(color);
+    
+    return (
+      <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <div className="p-2 rounded-full mr-3" style={{ backgroundColor: `${colorCode}20` }}>
+              {icon}
+            </div>
+            <h3 className="text-xl font-bold">{selectedKPI}</h3>
+          </div>
+          <button 
+            onClick={closeModal} 
+            className="p-1 rounded-full hover:bg-gray-100"
+            aria-label="Close"
+          >
+            <FiX size={20} />
+          </button>
+        </div>
+        
+        <div className="mb-6">
+          <p className="text-gray-600">
+            {kpiDescriptions[selectedKPI]}
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-sm text-gray-500">Current Value</div>
+            <div className="text-xl font-bold">{value}</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-sm text-gray-500">Change</div>
+            <div className={`text-xl font-bold ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {change >= 0 ? '+' : ''}{change.toFixed(1)}%
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-sm text-gray-500">Trend</div>
+            <div className="text-lg">{getTrendText(change)}</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-sm text-gray-500">Period</div>
+            <div className="text-lg">Last 6 months</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <KPICard
-        title="Total Sales"
-        value={`$${kpiData.totalSales.toLocaleString()}`}
-        icon={<FiDollarSign size={20} className="text-blue-600" />}
-        change={kpiData.changes.sales}
-        sparklineData={kpiData.sparklineData.sales}
-        color="blue"
-      />
-      
-      <KPICard
-        title="Total Profit"
-        value={`$${kpiData.totalProfit.toLocaleString()}`}
-        icon={<FiDollarSign size={20} className="text-green-600" />}
-        change={kpiData.changes.profit}
-        sparklineData={kpiData.sparklineData.profit}
-        color="green"
-      />
-      
-      <KPICard
-        title="Total Orders"
-        value={kpiData.totalOrders.toLocaleString()}
-        icon={<FiShoppingBag size={20} className="text-purple-600" />}
-        change={kpiData.changes.orders}
-        sparklineData={kpiData.sparklineData.orders}
-        color="purple"
-      />
-      
-      <KPICard
-        title="Unique Customers"
-        value={kpiData.uniqueCustomers.toLocaleString()}
-        icon={<FiUsers size={20} className="text-orange-600" />}
-        change={kpiData.changes.customers}
-        sparklineData={kpiData.sparklineData.customers}
-        color="orange"
-      />
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div onClick={() => handleCardClick("Total Sales")}>
+          <FlippableKPICard
+            title="Total Sales"
+            value={`$${kpiData.totalSales.toLocaleString()}`}
+            icon={<FiDollarSign size={20} className="text-blue-600" />}
+            change={kpiData.changes.sales}
+            sparklineData={kpiData.sparklineData.sales}
+            color="blue"
+          />
+        </div>
+        
+        <div onClick={() => handleCardClick("Total Profit")}>
+          <FlippableKPICard
+            title="Total Profit"
+            value={`$${kpiData.totalProfit.toLocaleString()}`}
+            icon={<FiDollarSign size={20} className="text-green-600" />}
+            change={kpiData.changes.profit}
+            sparklineData={kpiData.sparklineData.profit}
+            color="green"
+          />
+        </div>
+        
+        <div onClick={() => handleCardClick("Total Orders")}>
+          <FlippableKPICard
+            title="Total Orders"
+            value={kpiData.totalOrders.toLocaleString()}
+            icon={<FiShoppingBag size={20} className="text-purple-600" />}
+            change={kpiData.changes.orders}
+            sparklineData={kpiData.sparklineData.orders}
+            color="purple"
+          />
+        </div>
+        
+        <div onClick={() => handleCardClick("Unique Customers")}>
+          <FlippableKPICard
+            title="Unique Customers"
+            value={kpiData.uniqueCustomers.toLocaleString()}
+            icon={<FiUsers size={20} className="text-orange-600" />}
+            change={kpiData.changes.customers}
+            sparklineData={kpiData.sparklineData.customers}
+            color="orange"
+          />
+        </div>
+      </div>
+
+      {/* Modal */}
+      {selectedKPI && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="relative" onClick={e => e.stopPropagation()}>
+            {renderModalContent()}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
