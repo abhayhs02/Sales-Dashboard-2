@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import Papa from 'papaparse';
+import Papa from 'papaparse'; // Keep the import even if it's causing errors
 
 import GeoMapPieChart from '../GeoMapCharts/GeoMapPieChart';
 import GeoMapTable from '../GeoMapCharts/GeoMapTable';
 import GeoMapBarChart from '../GeoMapCharts/GeoMapBarChart';
-import GeoMapTableGalaryView from '../GeoMapCharts/GeoMapTableGalaryView'; // Import the new component
+import GeoMapTableGalaryView from '../GeoMapCharts/GeoMapTableGalaryView';
+
+import './GeographicMap.css'; // Import the CSS file
 
 // Fix for Leaflet marker issue
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -32,7 +34,7 @@ const GeographicMap = () => {
   const [showPopup, setShowPopup] = useState(false);
   const mapRef = useRef(null);
   const [countryCoordinates, setCountryCoordinates] = useState({});
-  const [selectedEmployee, setSelectedEmployee] = useState(null); // State for selected employee
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [drillLevel, setDrillLevel] = useState('country');
   const [currentFilter, setCurrentFilter] = useState(null);
@@ -239,7 +241,7 @@ const GeographicMap = () => {
         const employeeData = [];
         filteredData.forEach((item) => {
           if (item.EmployeeName && !employeeData.find(e => e.EmployeeName === item.EmployeeName)) {
-            employeeData.push(item); // Store the entire employee object
+            employeeData.push(item);
           }
         });
         setChartData(employeeData);
@@ -266,15 +268,15 @@ const GeographicMap = () => {
 
   const closePopup = () => {
     setShowPopup(false);
-    setSelectedEmployee(null); // Also clear selected employee when closing the main popup
+    setSelectedEmployee(null);
   };
 
   const handleEmployeeClick = (employee) => {
-    setSelectedEmployee(employee); // Set the selected employee
+    setSelectedEmployee(employee);
   };
 
   const handleCloseEmployeePopup = () => {
-    setSelectedEmployee(null); // Clear the selected employee
+    setSelectedEmployee(null);
   };
 
   const renderChart = () => {
@@ -289,8 +291,8 @@ const GeographicMap = () => {
       padding: '20px',
       boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.5)',
       zIndex: 1001,
-      width: selectedFilter === 'employees' ? '90%' : '80%', // Larger width for employees
-      maxWidth: selectedFilter === 'employees' ? '800px' : '600px', // Larger max width for employees
+      width: selectedFilter === 'employees' ? '90%' : '80%',
+      maxWidth: selectedFilter === 'employees' ? '800px' : '600px',
       textAlign: 'center',
       display: 'flex',
       flexDirection: 'column',
@@ -376,7 +378,7 @@ const GeographicMap = () => {
                 </svg>
               </button>
               <h2 style={{ fontWeight: 'bold' }}>{chartHeading}</h2>
-              <GeoMapTable data={chartData}  onEmployeeClick={handleEmployeeClick}/> {/* Pass the click handler */}
+              <GeoMapTable data={chartData} onEmployeeClick={handleEmployeeClick} />
             </div>
           </div>
         );
@@ -536,31 +538,49 @@ const GeographicMap = () => {
   }, [geoJsonData, mapData, selectedFilter, onEachFeature]);
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Dropdown Filter */}
-      <select
-        value={selectedFilter}
-        onChange={handleFilterChange}
+    <div className="geographic-map-container"> {/* Apply the CSS class */}
+      {/* Enhanced Dropdown Filter */}
+      <div
         style={{
           position: 'absolute',
           top: '10px',
           right: '10px',
           zIndex: 1000,
-          padding: '8px',
-          fontSize: '14px',
         }}
       >
-        <option value="products">Products</option>
-        <option value="employees">Employees</option>
-        <option value="inventory">Inventory</option>
-      </select>
+        <select
+          value={selectedFilter}
+          onChange={handleFilterChange}
+          style={{
+            padding: '8px 24px 8px 8px',
+            fontSize: '14px',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            backgroundColor: 'white',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+            appearance: 'none',
+            backgroundImage:
+              'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' strokeWidth=\'2\' strokeLinecap=\'round\' strokeLinejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'/%3E%3C/svg%3E")',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 8px center',
+            backgroundSize: '16px',
+            transition: 'all 0.2s ease-in-out',
+            cursor: 'pointer',
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#6c63ff';
+            e.target.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = '#ccc';
+            e.target.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
+          }}
+        >
+          <option value="products">Products</option>
+          <option value="employees">Employees</option>
+          <option value="inventory">Inventory</option>
+        </select>
+      </div>
 
       {/* Map Container */}
       <MapContainer
@@ -569,6 +589,7 @@ const GeographicMap = () => {
         style={{
           width: '100%',
           height: '500px',
+          borderRadius: '8px',
         }}
         zoomControl={false}
         dragging={false}
@@ -599,7 +620,7 @@ const GeographicMap = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1002, // Higher z-index than the main popup
+            zIndex: 1002,
           }}
         >
           <GeoMapTableGalaryView employee={selectedEmployee} onClose={handleCloseEmployeePopup} />
