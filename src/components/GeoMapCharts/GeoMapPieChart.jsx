@@ -15,16 +15,16 @@ const GeoMapPieChart = ({ data, onClose, countryName }) => {
         label: 'Count',
         data: data.map(item => item.value),
         backgroundColor: [
-          'rgba(255, 99, 132, 0.9)',    // Red
-          'rgba(54, 162, 235, 0.9)',   // Blue
-          'rgba(255, 206, 86, 0.9)',   // Yellow
-          'rgba(75, 192, 192, 0.9)',   // Green
-          'rgba(153, 102, 255, 0.9)',  // Purple
-          'rgba(255, 159, 64, 0.9)',   // Orange
-          'rgba(120, 200, 100, 0.9)',  // Light Green
-          'rgba(200, 120, 100, 0.9)',  // Light Red
-          'rgba(100, 120, 200, 0.9)',  // Light Blue
-          'rgba(200, 100, 120, 0.9)',  // Light Pink
+          'rgba(250, 8, 61, 0.9)',    // Red
+          'rgba(12, 151, 244, 0.9)',   // Blue
+          'rgba(244, 178, 13, 0.9)',   // Yellow
+          'rgba(34, 208, 208, 0.9)',   // Green
+          'rgba(87, 33, 194, 0.9)',  // Purple
+          'rgba(225, 121, 18, 0.9)',   // Orange
+          'rgba(66, 210, 30, 0.9)',  // Light Green
+          'rgba(198, 52, 16, 0.9)',  // Light Red
+          'rgba(18, 53, 194, 0.9)',  // Light Blue
+          'rgba(184, 12, 47, 0.9)',  // Light Pink
         ],
         borderWidth: 1,
       },
