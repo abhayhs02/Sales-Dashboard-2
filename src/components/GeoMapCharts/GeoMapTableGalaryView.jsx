@@ -49,38 +49,45 @@ const GeoMapTableGalaryView = ({ employee, onClose }) => {
         <img src={unknownImageUrl} alt={employee.EmployeeName} style={imageStyle} />
         <div>
           <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>{employee.EmployeeName}</div>
-          <div>{employee.JobTitle}</div>
+          <div>{employee.EmployeeJobTitle}</div>
         </div>
       </div>
 
       <div style={sectionStyle}>
         <span style={labelStyle}>Email:</span>
-        <span>{employee.EmployeeEmail}</span>
+        <span>{employee.EmployeeName}</span> {/* Corrected Email Field */}
       </div>
 
       <div style={sectionStyle}>
         <span style={labelStyle}>Phone:</span>
-        <span>{employee.PhoneNo}</span>
+        <span>{employee.EmployeePhone}</span> {/* Corrected Phone Field */}
       </div>
+
+        {employee.EmployeeHireDate && (
+          <div style={sectionStyle}>
+            <span style={labelStyle}>Hire Date:</span>
+            <span>{employee.EmployeeHireDate}</span>
+          </div>
+        )}
 
       <div style={sectionStyle}>
         <span style={labelStyle}>Country:</span>
-        <span>{employee.Country}</span>
+        <span>{employee.CountryName}</span> {/* Corrected Country Field */}
       </div>
 
       <div style={sectionStyle}>
         <span style={labelStyle}>State:</span>
-        <span>{employee.State}</span>
+        <span>{employee.State}</span> {/* Corrected State Field */}
       </div>
 
       <div style={sectionStyle}>
         <span style={labelStyle}>City:</span>
-        <span>{employee.City}</span>
+        <span>{employee.City}</span> {/* Corrected City Field */}
       </div>
 
       <div style={sectionStyle}>
         <span style={labelStyle}>Warehouse Address:</span>
-        <span>{employee.WarehouseAddress}</span>
+        <span>{employee.WarehouseAddress}</span> {/* Corrected Warehouse Address Field */}
       </div>
       <button style={closeButtonStyle} onClick={onClose}>Close</button>
     </div>

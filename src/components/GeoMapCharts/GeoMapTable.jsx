@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+// Updated GeoMapTable.jsx
+import React from 'react';
 import unknownImageUrl from './unknow_image.jpg';
-import GeoMapTableGalaryView from './GeoMapTableGalaryView';
 
-const GeoMapTable = ({ data }) => {
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-
+const GeoMapTable = ({ data, onEmployeeClick }) => { // Add onEmployeeClick prop
   const containerStyle = {
     display: 'flex',
     flexWrap: 'wrap',
@@ -43,21 +41,13 @@ const GeoMapTable = ({ data }) => {
     fontWeight: 'bold',
   };
 
-  const handleEmployeeClick = (employee) => {
-    setSelectedEmployee(employee);
-  };
-
-  const handleClosePopup = () => {
-    setSelectedEmployee(null);
-  };
-
   return (
     <div style={containerStyle}>
       {data.map((employee, index) => (
         <div
           key={index}
           style={{ ...employeeCardStyle, cursor: 'pointer' }}
-          onClick={() => handleEmployeeClick(employee)}
+          onClick={() => onEmployeeClick(employee)} // Call onEmployeeClick
         >
           <img
             src={unknownImageUrl}
@@ -67,27 +57,6 @@ const GeoMapTable = ({ data }) => {
           <div style={nameStyle}>{employee.EmployeeName}</div>
         </div>
       ))}
-
-      {selectedEmployee && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-            backdropFilter: 'blur(5px)', // Apply blur effect
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-          }}
-        >
-          <GeoMapTableGalaryView employee={selectedEmployee} onClose={handleClosePopup} />
-          
-        </div>
-      )}
     </div>
   );
 };

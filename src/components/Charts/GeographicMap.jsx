@@ -7,6 +7,7 @@ import Papa from 'papaparse';
 import GeoMapPieChart from '../GeoMapCharts/GeoMapPieChart';
 import GeoMapTable from '../GeoMapCharts/GeoMapTable';
 import GeoMapBarChart from '../GeoMapCharts/GeoMapBarChart';
+import GeoMapTableGalaryView from '../GeoMapCharts/GeoMapTableGalaryView'; // Import the new component
 
 // Fix for Leaflet marker issue
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -31,6 +32,7 @@ const GeographicMap = () => {
   const [showPopup, setShowPopup] = useState(false);
   const mapRef = useRef(null);
   const [countryCoordinates, setCountryCoordinates] = useState({});
+  const [selectedEmployee, setSelectedEmployee] = useState(null); // State for selected employee
 
   const [drillLevel, setDrillLevel] = useState('country');
   const [currentFilter, setCurrentFilter] = useState(null);
@@ -237,7 +239,7 @@ const GeographicMap = () => {
         const employeeData = [];
         filteredData.forEach((item) => {
           if (item.EmployeeName && !employeeData.find(e => e.EmployeeName === item.EmployeeName)) {
-            employeeData.push({ EmployeeName: item.EmployeeName });
+            employeeData.push(item); // Store the entire employee object
           }
         });
         setChartData(employeeData);
@@ -264,6 +266,15 @@ const GeographicMap = () => {
 
   const closePopup = () => {
     setShowPopup(false);
+    setSelectedEmployee(null); // Also clear selected employee when closing the main popup
+  };
+
+  const handleEmployeeClick = (employee) => {
+    setSelectedEmployee(employee); // Set the selected employee
+  };
+
+  const handleCloseEmployeePopup = () => {
+    setSelectedEmployee(null); // Clear the selected employee
   };
 
   const renderChart = () => {
@@ -353,7 +364,7 @@ const GeographicMap = () => {
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24 24"
+                  viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -365,7 +376,7 @@ const GeographicMap = () => {
                 </svg>
               </button>
               <h2 style={{ fontWeight: 'bold' }}>{chartHeading}</h2>
-              <GeoMapTable data={chartData} onClose={closePopup} />
+              <GeoMapTable data={chartData}  onEmployeeClick={handleEmployeeClick}/> {/* Pass the click handler */}
             </div>
           </div>
         );
@@ -573,6 +584,27 @@ const GeographicMap = () => {
         />
       </MapContainer>
       {renderChart()}
+
+      {/* Employee Gallery Popup */}
+      {selectedEmployee && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1002, // Higher z-index than the main popup
+          }}
+        >
+          <GeoMapTableGalaryView employee={selectedEmployee} onClose={handleCloseEmployeePopup} />
+        </div>
+      )}
     </div>
   );
 };
