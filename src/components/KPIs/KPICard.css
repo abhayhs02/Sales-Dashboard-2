@@ -1,0 +1,62 @@
+/* If you don't have a KPICard.css file, create one. Otherwise, add these styles to your existing file */
+.kpi-card {
+  background-color: white;
+  border-radius: 0.5rem; /* Equivalent to rounded-lg */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-md */
+  padding: 1rem; /* Equivalent to p-4 */
+  height: 10rem; /* Equivalent to h-40 */
+  transition: box-shadow 0.3s ease; /* Equivalent to transition-shadow */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Equivalent to hover:shadow-lg */
+}
+
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem; /* Equivalent to mb-2 */
+}
+
+.kpi-card-title {
+  font-size: 0.875rem; /* Equivalent to text-sm */
+  font-weight: 500; /* Equivalent to font-medium */
+  color: #6b7280; /* Equivalent to text-gray-500 */
+}
+
+.kpi-card-icon-container {
+  padding: 0.5rem; /* Equivalent to p-2 */
+  border-radius: 9999px; /* Equivalent to rounded-full */
+}
+
+.kpi-card-value-container {
+  margin-bottom: auto; /* Changed from margin-bottom: 0.5rem */
+  margin-top: 0.5rem;
+}
+
+.kpi-card-value {
+  font-size: 1.5rem; /* Approximates text-2xl */
+  font-weight: bold; /* Equivalent to font-bold */
+}
+
+.kpi-card-change {
+  font-size: 0.875rem; /* Equivalent to text-sm */
+}
+
+.kpi-card-sparkline {
+  margin-top: 0.5rem; /* Equivalent to mt-2 */
+}
+
+.kpi-card-details {
+  font-size: 0.75rem; /* Equivalent to text-xs */
+  text-align: center; /* Equivalent to text-center */
+  color: #9ca3af; /* Equivalent to text-gray-400 */
+  margin-top: auto; /* Changed from margin-top: 0.25rem */
+  overflow: hidden; /* Ensure text stays within the container */
+  text-overflow: ellipsis; /* Add ellipsis if the text overflows */
+  white-space: nowrap; /* Prevent text from wrapping to the next line */
+}
