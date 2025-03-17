@@ -3,6 +3,8 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+import './GeoMapPieChart.css'; // Import CSS
+
 ChartJS.register(ArcElement, Tooltip, Legend, Title, ChartDataLabels);
 
 const GeoMapPieChart = ({ data, onClose, countryName }) => {
@@ -76,8 +78,8 @@ const GeoMapPieChart = ({ data, onClose, countryName }) => {
   }, [chartRef]);
 
   return (
-    <div className="relative" style={{ width: '400px', height: '400px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div className="pie-chart-container">
+      <div className="pie-chart-inner">
         <Pie ref={chartRef} data={chartData} options={chartOptions} plugins={[ChartDataLabels]} />
       </div>
     </div>

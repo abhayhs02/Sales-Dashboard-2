@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -10,6 +10,7 @@ import GeoMapBarChart from '../GeoMapCharts/GeoMapBarChart';
 import GeoMapTableGalaryView from '../GeoMapCharts/GeoMapTableGalaryView';
 
 import './GeographicMap.css'; // Import the CSS file
+import { DataContext } from '../../context/DataContext'; // Import DataContext
 
 // Fix for Leaflet marker issue
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -38,6 +39,8 @@ const GeographicMap = () => {
 
   const [drillLevel, setDrillLevel] = useState('country');
   const [currentFilter, setCurrentFilter] = useState(null);
+
+  const { isDarkMode } = useContext(DataContext); // Access isDarkMode from DataContext
 
   const parseCSVData = (csvText) => {
     return new Promise((resolve, reject) => {
@@ -282,34 +285,6 @@ const GeographicMap = () => {
   const renderChart = () => {
     if (!showPopup || !selectedCountry || !chartData) return null;
 
-    const popupStyle = {
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'white',
-      padding: '20px',
-      boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.5)',
-      zIndex: 1001,
-      width: selectedFilter === 'employees' ? '90%' : '80%',
-      maxWidth: selectedFilter === 'employees' ? '800px' : '600px',
-      textAlign: 'center',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-    };
-
-    const backdropStyle = {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: 'rgba(0, 0, 0, 0.5)',
-      zIndex: 1000,
-    };
-
     let chartHeading = "";
     switch (selectedFilter) {
       case 'products':
@@ -325,99 +300,50 @@ const GeographicMap = () => {
         chartHeading = selectedCountry;
     }
 
+    let popupContent;
     switch (selectedFilter) {
       case 'products':
-        return (
-          <div style={backdropStyle}>
-            <div className="rounded-lg shadow-md" style={popupStyle}>
-              <button
-                onClick={closePopup}
-                className="absolute top-2 left-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-              </button>
-              <h2 style={{ fontWeight: 'bold' }}>{chartHeading}</h2>
-              <GeoMapPieChart data={chartData} onClose={closePopup} countryName={selectedCountry} />
-            </div>
-          </div>
-        );
+        popupContent = <GeoMapPieChart data={chartData} onClose={closePopup} countryName={selectedCountry} />;
+        break;
       case 'employees':
-        return (
-          <div style={backdropStyle}>
-            <div className="rounded-lg shadow-md" style={popupStyle}>
-              <button
-                onClick={closePopup}
-                className="absolute top-2 left-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-              </button>
-              <h2 style={{ fontWeight: 'bold' }}>{chartHeading}</h2>
-              <GeoMapTable data={chartData} onEmployeeClick={handleEmployeeClick} />
-            </div>
-          </div>
-        );
+        popupContent = <GeoMapTable data={chartData} onEmployeeClick={handleEmployeeClick} />;
+        break;
       case 'inventory':
-        return (
-          <div style={backdropStyle}>
-            <div className="rounded-lg shadow-md" style={popupStyle}>
-              <button
-                onClick={closePopup}
-                className="absolute top-2 left-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-              </button>
-              <h2 style={{ fontWeight: 'bold' }}>{chartHeading}</h2>
-              <GeoMapBarChart data={chartData} onClose={closePopup} />
-            </div>
-          </div>
-        );
+        popupContent = <GeoMapBarChart data={chartData} onClose={closePopup} />;
+        break;
       default:
-        return null;
+        popupContent = null;
     }
-  };
 
-  const mapContentStyle = {
-    transform: 'scaleY(0.8) !important',
-    transformOrigin: 'center center !important',
+    return (
+      <div className={`popup-backdrop ${isDarkMode ? 'dark' : ''}`}>
+        <div className={`popup-container rounded-lg shadow-md ${isDarkMode ? 'dark' : ''}`}>
+          <div className="popup-header">
+            <button
+              onClick={closePopup}
+              className={`popup-close-button ${isDarkMode ? 'dark' : ''}`}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            </button>
+            <h2 className="popup-heading">{chartHeading}</h2>
+          </div>
+          {popupContent}
+        </div>
+      </div>
+    );
   };
 
   const bindTooltip = (layer, feature, dataPoint) => {
@@ -538,43 +464,13 @@ const GeographicMap = () => {
   }, [geoJsonData, mapData, selectedFilter, onEachFeature]);
 
   return (
-    <div className="geographic-map-container"> {/* Apply the CSS class */}
+    <div className={`geographic-map-container ${isDarkMode ? 'dark' : ''}`}>
       {/* Enhanced Dropdown Filter */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 1000,
-        }}
-      >
+      <div className="filter-container">
         <select
           value={selectedFilter}
           onChange={handleFilterChange}
-          style={{
-            padding: '8px 24px 8px 8px',
-            fontSize: '14px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-            appearance: 'none',
-            backgroundImage:
-              'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' strokeWidth=\'2\' strokeLinecap=\'round\' strokeLinejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'/%3E%3C/svg%3E")',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 8px center',
-            backgroundSize: '16px',
-            transition: 'all 0.2s ease-in-out',
-            cursor: 'pointer',
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = '#6c63ff';
-            e.target.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.2)';
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = '#ccc';
-            e.target.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
-          }}
+          className={`filter-select ${isDarkMode ? 'dark' : ''}`}
         >
           <option value="products">Products</option>
           <option value="employees">Employees</option>
@@ -586,11 +482,7 @@ const GeographicMap = () => {
       <MapContainer
         center={mapCenter}
         zoom={zoomLevel}
-        style={{
-          width: '100%',
-          height: '500px',
-          borderRadius: '8px',
-        }}
+        className="map-container"
         zoomControl={false}
         dragging={false}
         doubleClickZoom={false}
@@ -608,21 +500,7 @@ const GeographicMap = () => {
 
       {/* Employee Gallery Popup */}
       {selectedEmployee && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(5px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1002,
-          }}
-        >
+        <div className="employee-gallery-backdrop">
           <GeoMapTableGalaryView employee={selectedEmployee} onClose={handleCloseEmployeePopup} />
         </div>
       )}

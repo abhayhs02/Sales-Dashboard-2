@@ -1,0 +1,32 @@
+.dark {
+    background-color: #121212;
+    color: #fff; /* Default text color in dark mode */
+  }
+  
+  .dark .bg-white {
+    background-color: #121212;
+  }
+  
+  /* Override text color for elements with the 'text-black' class */
+  .dark .text-black {
+    color: #fff;
+  }
+  
+  /* Override text color for KPI box numbers (replace 'kpi-number' with the actual class) */
+  .dark .kpi-number {
+    color: #fff;
+  }
+
+  /* Apply dark mode styles to all elements */
+  .dark * {
+    color: #fff; /* Set default text color to white in dark mode */
+  }
+
+  /* Reset specific elements that should have a different color */
+  .dark a {
+    color: #9f7aea; /* Example: Link color */
+  }
+
+  .dark .bg-indigo-100 {
+    background-color: #4b5563; /* Example: Adjust background color */
+  }

@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Papa from 'papaparse';
 import MainLayout from './components/Layout/MainLayout';
 import DashboardView from './components/DashboardView';
 import { DataContext } from './context/DataContext';
 import { FilterContext } from './context/FilterContext';
+import useDarkMode from './hooks/useDarkMode'; // Import the custom hook
+import './App.css';
 
 // Initial filter state - set to 2017 data by default
 const initialFilters = {
@@ -28,6 +30,24 @@ function App() {
   
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Dark mode state
+  const [isDarkMode, toggleDarkMode] = useDarkMode(); // Use the custom hook
+  const appRef = useRef(null);
+
+  useEffect(() => {
+    updateTextColors(isDarkMode);
+  }, [isDarkMode]);
+
+  const updateTextColors = (darkMode) => {
+    if (appRef.current) {
+      const textColor = darkMode ? '#fff !important' : '#000 !important'; // Add !important
+      const elements = appRef.current.querySelectorAll('*'); // Select all elements within the app
+      elements.forEach((element) => {
+        element.style.color = textColor;
+      });
+    }
+  };
 
   // Memoized filtered data to prevent unnecessary recalculations
   const filteredData = useMemo(() => {
@@ -234,21 +254,23 @@ function App() {
 
   // Render dashboard
   return (
-    <DataContext.Provider value={{ data: filteredData, allData: data }}>
-      <FilterContext.Provider value={{ 
-        filters, 
-        updateFilter, 
-        resetFilters, 
-        filterOptions 
-      }}>
-        <MainLayout 
-          sidebarOpen={sidebarOpen}
-          toggleSidebar={toggleSidebar}
-        >
-          <DashboardView />
-        </MainLayout>
-      </FilterContext.Provider>
-    </DataContext.Provider>
+    <div className={`App ${isDarkMode ? 'dark' : ''}`} ref={appRef}>
+      <DataContext.Provider value={{ data: filteredData, allData: data }}>
+        <FilterContext.Provider value={{ 
+          filters, 
+          updateFilter, 
+          resetFilters, 
+          filterOptions 
+        }}>
+          <MainLayout 
+            sidebarOpen={sidebarOpen}
+            toggleSidebar={toggleSidebar}
+          >
+            <DashboardView />
+          </MainLayout>
+        </FilterContext.Provider>
+      </DataContext.Provider>
+    </div>
   );
 }
 

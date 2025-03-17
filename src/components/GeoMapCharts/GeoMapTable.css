@@ -1,0 +1,49 @@
+.employee-table-container {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    justify-content: center; /* Keep this for horizontal alignment */
+    align-items: flex-start; /* Keep this for vertical alignment */
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    height: 400px;
+    background-color: #f0f0f0;
+  }
+  
+  .employee-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Keep this for centering items in the card */
+    width: 200px;
+    text-align: center;
+    border: 1px solid #ccc;
+    borderRadius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  
+  .employee-image {
+    width: 100px;
+    height: 100px;
+    borderRadius: 50%;
+    objectFit: cover;
+    margin-bottom: 10px;
+  }
+  
+  .employee-name {
+    fontSize: 1.2em;
+    fontWeight: bold;
+  }
+  
+  /* Dark Mode Styles */
+  .dark .employee-table-container {
+    background-color: #333;
+  }
+  
+  .dark .employee-card {
+    border-color: #555;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    color: #fff; /* Ensure text is white in dark mode */
+  }

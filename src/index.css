@@ -10,6 +10,34 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Define CSS variables for text colors */
+  --text-color: #000; /* Default text color: black */
+  --bg-color: #fff; /* Default background color: white */
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+/* Dark mode styles */
+.dark body {
+  --text-color: #fff; /* Text color in dark mode: white */
+  --bg-color: #1a202c; /* Background color in dark mode */
+}
+
+.dark .bg-white {
+  background-color: #2d3748;
+}
+
+.dark .text-gray-600 {
+  color: #a0aec0;
+}
+
+.dark .text-indigo-700 {
+  color: #9f7aea;
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Chart Specific Styles */
